@@ -1,41 +1,40 @@
 /**
- * cf_ai_docpilot — Cloudflare Pages + Functions + D1
+ * cf_ai_docpilot — Cloudflare Pages + Functions + D1 + R2
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
- {
+{
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "cf_ai_docpilot",
 	"compatibility_date": "2026-04-13",
 	"pages_build_output_dir": "./dist",
 	"observability": {
-	  "enabled": true
+		"enabled": true
 	},
 	"upload_source_maps": true,
 	"compatibility_flags": [
-	  "nodejs_compat"
+		"nodejs_compat"
 	],
-  
 	/**
 	 * D1 — document metadata, chat sessions/messages/summaries.
-	 * Remote DB already created.
-	 * Local Pages dev also needs preview_database_id.
+	 * TODO: keep database_id in sync with `wrangler d1 create` output for production.
 	 */
 	"d1_databases": [
-	  {
-		"binding": "DB",
-		"database_name": "cf_ai_docpilot",
-		"database_id": "39c3c8e7-9c1d-4a2e-99d1-a07c7f61e8fd",
-		"preview_database_id": "DB"
-	  }
+		{
+			"binding": "DB",
+			"database_name": "cf_ai_docpilot",
+			"database_id": "39c3c8e7-9c1d-4a2e-99d1-a07c7f61e8fd",
+			"preview_database_id": "DB"
+		}
+	],
+	/** R2 — raw uploads. Bucket `cf-ai-docpilot-docs` must exist in this account. */
+	"r2_buckets": [
+		{
+			"binding": "DOCS_BUCKET",
+			"bucket_name": "cf-ai-docpilot-docs"
+		}
 	]
-  
-	// TODO (later): R2 — raw uploads
-	// ,"r2_buckets": [{ "binding": "DOCS_BUCKET", "bucket_name": "cf-ai-docpilot-docs" }]
-  
 	// TODO (later): Vectorize — chunk embeddings
 	// ,"vectorize": [{ "binding": "VECTOR_INDEX", "index_name": "..." }]
-  
-	// TODO (later): Workers AI bindings via wrangler / compatibility
-  
+	// TODO (later): Workers AI bindings
 	// TODO (later): Workflows — background summaries
-  }
+}

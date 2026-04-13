@@ -87,3 +87,63 @@ Instructions:
 - then list exactly what I need to do manually in the terminal after the changes
 
 # Prompt 3: 
+Use the current cf_ai_docpilot codebase and preserve the existing Pages Functions + D1 foundation.
+
+Current goal:
+Implement real document upload to R2 and document metadata persistence in D1.
+
+Scope for this phase:
+- add the R2 binding to wrangler config
+- implement POST /api/documents/upload
+- implement GET /api/documents/:id
+- update GET /api/documents if needed
+- accept actual file uploads from the backend route
+- store the raw uploaded file in R2
+- create the corresponding document row in D1 with status = 'pending'
+
+Do not implement ingestion, chunking, PDF parsing, Vectorize, Workers AI, chat, or Workflows yet.
+Do not add auth or large UI work.
+
+Requirements:
+1. Update wrangler.jsonc to include an R2 bucket binding named DOCS_BUCKET, with a clear TODO/placeholders where needed
+2. Add the Pages Functions files needed for:
+   - POST /api/documents/upload
+   - GET /api/documents/[id]
+3. Accept multipart/form-data upload with a single file field
+4. Validate:
+   - allowed file types: pdf, txt, md
+   - reasonable size limit
+   - missing file errors
+5. Store the raw file in R2 with a deterministic object key
+6. Insert a D1 document record containing at least:
+   - id
+   - title
+   - r2_key
+   - mime_type
+   - byte_size
+   - status
+   - created_at / updated_at
+7. Return clean JSON responses and clear error messages
+8. Keep route handlers thin and move storage/DB logic into small helper modules
+9. Reuse the existing D1 foundation and code style already in the repo
+
+Constraints:
+- no ingestion pipeline yet
+- no vector index work yet
+- no PDF text extraction yet
+- no broad refactors
+- keep code typed, small, and production-leaning
+
+Acceptance criteria:
+- I can POST a real file to /api/documents/upload
+- the file is stored in R2
+- a document row is created in D1 with status 'pending'
+- GET /api/documents lists the uploaded document
+- GET /api/documents/:id returns document metadata
+- code is modular and consistent with the current structure
+
+Instructions:
+- first give a concise implementation plan
+- then make the code changes
+- then list the exact Cloudflare setup steps I must do manually next, including the R2 bucket creation command and any config values I need to paste into wrangler.jsonc
+- then list exact curl commands I can use to test the upload endpoint locally

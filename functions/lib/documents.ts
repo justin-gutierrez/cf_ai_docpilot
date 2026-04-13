@@ -11,3 +11,34 @@ export async function listDocuments(db: D1Database): Promise<DocumentRow[]> {
 
   return results ?? []
 }
+
+export async function getDocumentById(db: D1Database, id: string): Promise<DocumentRow | null> {
+  const row = await db
+    .prepare(
+      `SELECT id, title, r2_key, mime_type, byte_size, status, error, chunk_count, created_at, updated_at
+       FROM documents
+       WHERE id = ?`,
+    )
+    .bind(id)
+    .first<DocumentRow>()
+
+  return row ?? null
+}
+
+export type NewDocumentInput = {
+  id: string
+  title: string | null
+  r2Key: string
+  mimeType: string
+  byteSize: number
+}
+
+export async function insertPendingDocument(db: D1Database, input: NewDocumentInput): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO documents (id, title, r2_key, mime_type, byte_size, status, chunk_count, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'pending', 0, datetime('now'), datetime('now'))`,
+    )
+    .bind(input.id, input.title, input.r2Key, input.mimeType, input.byteSize)
+    .run()
+}

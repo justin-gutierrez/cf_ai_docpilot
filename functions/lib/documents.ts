@@ -42,3 +42,36 @@ export async function insertPendingDocument(db: D1Database, input: NewDocumentIn
     .bind(input.id, input.title, input.r2Key, input.mimeType, input.byteSize)
     .run()
 }
+
+export async function markDocumentProcessing(db: D1Database, id: string): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE documents
+       SET status = 'processing', error = NULL, updated_at = datetime('now')
+       WHERE id = ?`,
+    )
+    .bind(id)
+    .run()
+}
+
+export async function markDocumentReady(db: D1Database, id: string, chunkCount: number): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE documents
+       SET status = 'ready', error = NULL, chunk_count = ?, updated_at = datetime('now')
+       WHERE id = ?`,
+    )
+    .bind(chunkCount, id)
+    .run()
+}
+
+export async function markDocumentFailed(db: D1Database, id: string, error: string): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE documents
+       SET status = 'failed', error = ?, updated_at = datetime('now')
+       WHERE id = ?`,
+    )
+    .bind(error, id)
+    .run()
+}

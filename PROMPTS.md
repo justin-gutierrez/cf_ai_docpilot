@@ -147,3 +147,113 @@ Instructions:
 - then make the code changes
 - then list the exact Cloudflare setup steps I must do manually next, including the R2 bucket creation command and any config values I need to paste into wrangler.jsonc
 - then list exact curl commands I can use to test the upload endpoint locally
+
+# Prompt 4:
+Use your proposed upload plan and now actually implement the code changes in the repo.
+
+Current goal:
+Implement the real document upload phase for cf_ai_docpilot.
+
+The R2 bucket already exists in Cloudflare and wrangler.jsonc has already been updated with the R2 binding:
+- binding: DOCS_BUCKET
+- bucket_name: cf-ai-docpilot-docs
+
+Do the code changes now, not just the plan.
+
+Scope:
+- use the existing R2 binding in wrangler.jsonc
+- create the helper files you proposed
+- implement POST /api/documents/upload
+- implement GET /api/documents/[id]
+- extend the D1 document helpers as needed
+- keep the existing GET /api/documents working
+
+Requirements:
+1. Accept multipart/form-data with a required file field named file
+2. Allow pdf, txt, md, and markdown
+3. Enforce a reasonable size limit
+4. Store the raw uploaded file in R2 with a deterministic key
+5. Insert a D1 document row with status = 'pending'
+6. Return clear JSON responses and validation errors
+7. Keep route handlers thin and push logic into helper modules
+8. Preserve the existing Pages Functions + D1 foundation
+9. Do not implement ingestion, Vectorize, Workers AI, chat, or Workflows yet
+
+Constraints:
+- no auth
+- no broad refactors
+- no UI work unless absolutely required
+- no extra features beyond this upload phase
+
+Acceptance criteria:
+- POST /api/documents/upload stores a file in R2 and creates a D1 record
+- GET /api/documents returns the uploaded document
+- GET /api/documents/[id] returns document metadata
+- code is typed, small, and production-leaning
+
+Instructions:
+- first give a very short summary of the files you are about to edit
+- then make the code changes
+- then list the exact terminal commands I should run afterward to test locally
+- then give me the exact curl command to upload README.md for testing
+
+# Prompt 5:
+Use the current cf_ai_docpilot codebase and preserve the existing Pages Functions + D1 + R2 upload foundation.
+
+Current goal:
+Implement the ingestion foundation for uploaded documents.
+
+Do the code changes now, not just the plan.
+
+Scope for this phase:
+- add an ingestion route that processes one uploaded document by id
+- read the raw file from R2
+- support text extraction for txt, md, and markdown first
+- chunk the extracted text deterministically
+- insert chunk rows into D1
+- update the document status in D1 to processing, ready, or failed
+- keep pdf support as a clear TODO for the next phase
+
+Do not implement Vectorize, embeddings, Workers AI, chat, or Workflows yet.
+Do not add auth or UI work.
+
+Requirements:
+1. Add the Pages Functions file(s) needed for:
+   - POST /api/documents/[id]/ingest
+2. Read the uploaded file from R2 using the existing r2_key from D1
+3. Support text-based files only in this phase:
+   - .txt
+   - .md
+   - .markdown
+4. If the file is a pdf, return a clear not-yet-supported error and leave a TODO for the next phase
+5. Create deterministic chunking logic with a reasonable chunk size and overlap
+6. Insert chunk rows into the existing chunks table
+7. Update the document row:
+   - processing when ingestion starts
+   - ready when chunks are stored successfully
+   - failed with an error message when ingestion fails
+8. Keep route handlers thin and move extraction/chunking/DB logic into small helper modules
+9. Prevent duplicate chunk inserts for the same document on re-ingest by clearing old chunks first or handling it cleanly
+10. Preserve the current code style and structure
+
+Constraints:
+- no Vectorize yet
+- no Workers AI yet
+- no chat yet
+- no workflow yet
+- no broad refactors
+- keep code typed, small, and production-leaning
+
+Acceptance criteria:
+- I can POST to /api/documents/:id/ingest
+- a txt or md document is read from R2
+- chunk rows are created in D1
+- the document status changes to ready on success
+- errors are handled cleanly
+- code is modular and consistent with the current repo
+
+Instructions:
+- first give a very short summary of the files you are about to edit
+- then make the code changes
+- then list the exact terminal commands I should run afterward to test locally
+- then give me the exact curl commands to ingest the README.md document I already uploaded and to inspect the results afterward

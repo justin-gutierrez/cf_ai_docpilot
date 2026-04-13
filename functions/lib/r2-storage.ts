@@ -30,3 +30,10 @@ export async function putRawBytes(
 export async function deleteRawObject(bucket: R2Bucket, key: string): Promise<void> {
   await bucket.delete(key)
 }
+
+/** Full object body, or null if missing. */
+export async function getRawObjectBytes(bucket: R2Bucket, key: string): Promise<ArrayBuffer | null> {
+  const obj = await bucket.get(key)
+  if (!obj) return null
+  return obj.arrayBuffer()
+}

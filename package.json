@@ -1,5 +1,5 @@
 {
-  "name": "cloudflare",
+  "name": "cf_ai_docpilot",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,14 +8,18 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "npm run build && wrangler pages dev",
+    "dev:pages": "wrangler pages dev",
     "deploy": "npm run build && wrangler pages deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "db:migrate:local": "wrangler d1 migrations apply cf_ai_docpilot --local",
+    "db:migrate:remote": "wrangler d1 migrations apply cf_ai_docpilot --remote"
   },
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260413.1",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.7",

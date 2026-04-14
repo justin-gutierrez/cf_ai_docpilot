@@ -2,7 +2,8 @@ import type { TextChunk } from './chunk-text'
 
 const D1_BATCH_SIZE = 80
 
-function chunkRowId(documentId: string, ordinal: number): string {
+/** Stable D1 / Vectorize id: same document + ordinal always matches. */
+export function chunkRowId(documentId: string, ordinal: number): string {
   return `${documentId}:c:${ordinal.toString().padStart(8, '0')}`
 }
 

@@ -1,40 +1,62 @@
 /**
- * cf_ai_docpilot — Cloudflare Pages + Functions + D1 + R2
+ * cf_ai_docpilot — Cloudflare Pages + Functions + D1 + R2 + Vectorize + AI
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
-{
+ {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "cf_ai_docpilot",
 	"compatibility_date": "2026-04-13",
 	"pages_build_output_dir": "./dist",
 	"observability": {
-		"enabled": true
+	  "enabled": true
 	},
 	"upload_source_maps": true,
 	"compatibility_flags": [
-		"nodejs_compat"
+	  "nodejs_compat"
 	],
+  
 	/**
 	 * D1 — document metadata, chat sessions/messages/summaries.
-	 * TODO: keep database_id in sync with `wrangler d1 create` output for production.
+	 * Remote DB already created.
+	 * Local Pages dev also needs preview_database_id.
 	 */
 	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "cf_ai_docpilot",
-			"database_id": "39c3c8e7-9c1d-4a2e-99d1-a07c7f61e8fd",
-			"preview_database_id": "DB"
-		}
+	  {
+		"binding": "DB",
+		"database_name": "cf_ai_docpilot",
+		"database_id": "39c3c8e7-9c1d-4a2e-99d1-a07c7f61e8fd",
+		"preview_database_id": "DB"
+	  }
 	],
-	/** R2 — raw uploads. Bucket `cf-ai-docpilot-docs` must exist in this account. */
+  
+	/**
+	 * R2 — raw uploaded documents.
+	 */
 	"r2_buckets": [
-		{
-			"binding": "DOCS_BUCKET",
-			"bucket_name": "cf-ai-docpilot-docs"
-		}
-	]
-	// TODO (later): Vectorize — chunk embeddings
-	// ,"vectorize": [{ "binding": "VECTOR_INDEX", "index_name": "..." }]
-	// TODO (later): Workers AI bindings
+	  {
+		"binding": "DOCS_BUCKET",
+		"bucket_name": "cf-ai-docpilot-docs"
+	  }
+	],
+  
+	/**
+	 * Vectorize — chunk embeddings index.
+	 * Must match the real index name in your Cloudflare account.
+	 */
+	"vectorize": [
+	  {
+		"binding": "VECTOR_INDEX",
+		"index_name": "cf-ai-docpilot-index",
+		"remote": true
+	  }
+	],
+  
+	/**
+	 * Workers AI — embeddings now, generation later.
+	 */
+	"ai": {
+	  "binding": "AI"
+	}
+  
 	// TODO (later): Workflows — background summaries
-}
+  }

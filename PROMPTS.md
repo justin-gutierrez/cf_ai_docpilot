@@ -1,3 +1,8 @@
+# PROMPTS.md
+
+## Prompt 1
+
+```text
 # Prompt 1: 
 You are helping me build cf_ai_docpilot, a Cloudflare-native chat-with-your-documents app.
 
@@ -25,9 +30,11 @@ Please inspect the current scaffold and output:
 6. the first 5 implementation steps
 
 Do not generate lots of code yet. Keep the architecture practical and small.
+```
 
+## Prompt 2
 
-
+```text
 #Prompt 2:
 Use the architecture you just proposed and implement only the initial scaffolding and D1 foundation for cf_ai_docpilot.
 
@@ -85,7 +92,11 @@ Instructions:
 - first give a concise implementation plan
 - then make the code changes
 - then list exactly what I need to do manually in the terminal after the changes
+```
 
+## Prompt 3
+
+```text
 # Prompt 3: 
 Use the current cf_ai_docpilot codebase and preserve the existing Pages Functions + D1 foundation.
 
@@ -147,7 +158,11 @@ Instructions:
 - then make the code changes
 - then list the exact Cloudflare setup steps I must do manually next, including the R2 bucket creation command and any config values I need to paste into wrangler.jsonc
 - then list exact curl commands I can use to test the upload endpoint locally
+```
 
+## Prompt 4
+
+```text
 # Prompt 4:
 Use your proposed upload plan and now actually implement the code changes in the repo.
 
@@ -196,7 +211,11 @@ Instructions:
 - then make the code changes
 - then list the exact terminal commands I should run afterward to test locally
 - then give me the exact curl command to upload README.md for testing
+```
 
+## Prompt 5
+
+```text
 # Prompt 5:
 Use the current cf_ai_docpilot codebase and preserve the existing Pages Functions + D1 + R2 upload foundation.
 
@@ -257,7 +276,11 @@ Instructions:
 - then make the code changes
 - then list the exact terminal commands I should run afterward to test locally
 - then give me the exact curl commands to ingest the README.md document I already uploaded and to inspect the results afterward
+```
 
+## Prompt 6
+
+```text
 # Prompt 6: 
 Use the current cf_ai_docpilot codebase and preserve the existing Pages Functions + D1 + R2 + ingestion foundation.
 
@@ -311,7 +334,11 @@ Instructions:
   - the binding changes needed
   - how to expose the AI binding for local Pages development
 - then give me the exact terminal commands and curl command to test indexing the README document I already ingested
+```
 
+## Prompt 7
+
+```text
 # Prompt 7:
 Fix the Cloudflare Pages Functions route collision for document indexing.
 
@@ -351,8 +378,11 @@ Instructions:
 - then give me the exact curl commands to verify both:
   1. GET /api/documents/44a3e4bc-de63-4699-940b-a441ba1978d8
   2. POST /api/documents/44a3e4bc-de63-4699-940b-a441ba1978d8/index
+```
 
+## Prompt 8
 
+```text
 # Prompt 8: 
 Fix the document indexing route so Vectorize deletion is no longer a blocker for v1.
 
@@ -397,7 +427,11 @@ Instructions:
 - then make the code changes
 - then list the exact commands I should run to retest
 - then give me the exact curl command to re-index document 44a3e4bc-de63-4699-940b-a441ba1978d8
+```
 
+## Prompt 9
+
+```text
 # Prompt 9:
 Add targeted debugging and failure isolation to the document indexing path.
 
@@ -458,7 +492,11 @@ Instructions:
 - then make the code changes
 - then list the exact commands I should run to retest
 - then give me the exact curl command to test document 44a3e4bc-de63-4699-940b-a441ba1978d8 with limit=1
+```
 
+## Prompt 10
+
+```text
 # Prompt 10:
 Add a minimal Workers AI embeddings smoke test route and a fallback model option for cf_ai_docpilot.
 
@@ -516,7 +554,11 @@ Instructions:
 - then make the code changes
 - then list the exact commands I should run to test both routes
 - then give me the exact curl commands for both the base and small model smoke tests
+```
 
+## Prompt 11
+
+```text
 # Prompt 11:
 Pivot cf_ai_docpilot to a fully local, no-paid-API-key architecture for the final v1.
 
@@ -574,7 +616,11 @@ Instructions:
 - then make the code changes
 - then list the exact local setup commands I need, including Ollama model pulls
 - then list the exact README quickstart steps I should include
+```
 
+## Prompt 12
+
+```text
 # Prompt 12:
 Use the current cf_ai_docpilot codebase and preserve the existing local-only Ollama + D1 + R2 foundation.
 
@@ -644,3 +690,122 @@ Instructions:
   1. create a session
   2. ask a question about document 44a3e4bc-de63-4699-940b-a441ba1978d8
   3. fetch the session afterward
+```
+
+## Prompt 13
+
+```text
+# Prompt 13: 
+Create a strong project README for cf_ai_docpilot.
+
+Current state of the app:
+- Cloudflare Pages Functions app
+- D1 for metadata, chunks, sessions, and messages
+- R2 for uploaded raw documents
+- local Ollama for embeddings and chat
+- upload, ingest, index, and chat all work locally
+- citations are returned with answers
+- local-only setup is the official evaluation path
+
+Goal:
+Replace the default Vite README with a polished README that matches the assignment requirements and makes the project easy for a hiring team to evaluate locally.
+
+Requirements:
+1. Explain what the app does in plain language
+2. Explicitly map the project to the assignment requirements
+3. Include a local setup section with exact commands
+4. Include Ollama setup instructions
+5. Include Cloudflare local dev instructions
+6. Include a “How to try it” section with:
+   - upload
+   - ingest
+   - index
+   - ask a question
+7. Include sample curl commands and sample questions
+8. Include a short architecture section
+9. Include known limitations
+10. Mention that AI-assisted prompts are documented in PROMPTS.md
+
+Constraints:
+- keep it polished and concise
+- assume local-only evaluation
+- do not invent deployed links
+- do not mention unfinished features as completed
+
+Instructions:
+- first provide the full README.md content only
+```
+
+## Prompt 14
+
+```text
+# Prompt 14:
+Replace the current README.md with a more polished and detailed version that clearly satisfies this requirement:
+
+"must include a README.md file with project documentation and clear running instructions to try out components"
+
+Context:
+This repository is cf_ai_docpilot, a local-first Cloudflare-based chat-with-your-documents app.
+
+Current architecture:
+- Cloudflare Pages Functions
+- D1 for documents, chunks, embeddings, chat sessions, and chat messages
+- R2 for raw uploaded files
+- local Ollama for embeddings and chat
+- upload, ingest, index, and chat all work locally
+- citations are returned with answers
+- local-only setup is the official evaluation path
+
+Goal:
+Rewrite README.md so a completely new person can understand the project, install dependencies, run it locally, and test all major components end to end.
+
+Requirements:
+1. Explain what the app does in plain language
+2. Include a section explaining how the project satisfies the assignment
+3. Include a high-level architecture section
+4. Include prerequisites
+5. Include exact one-time setup instructions
+6. Include exact local development commands
+7. Include a step-by-step “How to try it” section covering:
+   - health check
+   - upload
+   - ingest
+   - index
+   - create chat session
+   - ask a question
+   - fetch session history
+8. Include sample curl commands for every core step
+9. Include troubleshooting notes
+10. Include current limitations
+11. Mention that AI-assisted prompts used during development are documented in PROMPTS.md
+12. Keep the README polished, detailed, practical, and reviewer-friendly
+13. Do not invent a deployed link
+14. Make local-only evaluation the primary path
+15. Be accurate about PDF support: allowed, but md/txt are the recommended evaluation formats
+
+Instructions:
+- output the full README.md content only
+- do not output commentary before or after
+```
+
+## Prompt 15
+
+```text
+# Prompt 15:
+Format my PROMPTS.md into polished Markdown while preserving every prompt exactly word for word and letter for letter.
+
+Important:
+- Do not rewrite, shorten, summarize, or paraphrase any prompt text
+- Preserve every prompt exactly as written
+- Only improve formatting and organization
+- Use a top-level title: # PROMPTS.md
+- Put each prompt under a heading like: ## Prompt 1
+- Wrap each prompt body in a fenced code block labeled text
+- Keep the prompt order exactly the same
+- Preserve spacing, punctuation, capitalization, and line breaks inside each prompt as much as possible
+- Do not omit any prompts
+- Do not add explanatory commentary outside the markdown content
+
+Instructions:
+- output the full PROMPTS.md content only
+```

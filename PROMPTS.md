@@ -516,3 +516,61 @@ Instructions:
 - then make the code changes
 - then list the exact commands I should run to test both routes
 - then give me the exact curl commands for both the base and small model smoke tests
+
+# Prompt 11:
+Pivot cf_ai_docpilot to a fully local, no-paid-API-key architecture for the final v1.
+
+Current goal:
+Remove the dependency on Workers AI and Vectorize, and replace them with local Ollama-based embeddings and local Ollama-based chat generation.
+
+Target architecture:
+- Cloudflare Pages Functions for the app/API
+- D1 for document metadata, chunk rows, chat sessions, and chat messages
+- R2 for raw uploaded files
+- Ollama running locally for:
+  - embeddings
+  - chat generation
+- embeddings stored in D1 on each chunk row
+- retrieval implemented in app code using cosine similarity over stored chunk embeddings
+
+Do the code changes now, not just the plan.
+
+Requirements:
+1. Remove the current dependency on Workers AI embeddings for indexing
+2. Remove the current dependency on Vectorize for retrieval
+3. Add a small Ollama client module that calls the local Ollama REST API
+4. Use:
+   - embedding model: nomic-embed-text
+   - chat model: qwen2.5:7b
+5. Extend the D1 schema as needed so chunk embeddings can be stored locally
+6. Update the indexing route so it:
+   - reads chunks from D1
+   - calls Ollama embeddings locally
+   - stores embeddings on chunk rows
+7. Add a retrieval helper that:
+   - embeds the user query with Ollama
+   - computes cosine similarity against chunk embeddings stored in D1
+   - returns top-k chunks
+8. Prepare the codebase for the later chat route using the same Ollama provider
+9. Keep changes minimal, typed, and production-leaning
+
+Constraints:
+- local-only instructions
+- no paid API keys
+- no Workers AI
+- no Vectorize
+- no broad UI work yet
+- preserve existing upload and ingestion flow where possible
+
+Acceptance criteria:
+- indexing no longer depends on Workers AI or Vectorize
+- embeddings are generated locally through Ollama
+- chunk embeddings are stored in D1
+- retrieval can be done locally from D1
+- the project is easy to document with local-only setup steps
+
+Instructions:
+- first give a very short summary of the files you are about to edit
+- then make the code changes
+- then list the exact local setup commands I need, including Ollama model pulls
+- then list the exact README quickstart steps I should include

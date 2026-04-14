@@ -1,16 +1,12 @@
-import {
-  BGE_BASE_EN_DIMS,
-  embedTextsBatched,
-  validateEmbeddingDimensions,
-} from './embeddings'
+import { updateChunkEmbeddingJson } from './chunk-embeddings'
+import { embedTextsWithOllama, validateEmbeddingSameDimensions } from './embeddings'
 import { getDocumentById } from './documents'
 import { listChunksForDocument } from './chunk-rows'
-import { upsertChunkVectors, V1_CLEANUP_SKIPPED, type VectorCleanupInfo } from './vector-index'
 
-export type IndexVectorsEnv = {
+export type IndexDocumentEnv = {
   DB: D1Database
-  AI: Ai
-  VECTOR_INDEX: VectorizeIndex
+  OLLAMA_BASE_URL: string
+  OLLAMA_EMBED_MODEL: string
 }
 
 export type IndexFailureStage =
@@ -19,10 +15,10 @@ export type IndexFailureStage =
   | 'load_chunks_failed'
   | 'embeddings_failed'
   | 'invalid_embedding_shape'
-  | 'vector_upsert_failed'
+  | 'persist_embeddings_failed'
 
 export type IndexVectorsOptions = {
-  /** When set, only the first N chunks are embedded and upserted (debug). */
+  /** When set, only the first N chunks are embedded and stored (debug). */
   chunkLimit?: number
 }
 
@@ -31,7 +27,8 @@ export type IndexVectorsResult =
       ok: true
       documentId: string
       indexed: number
-      vectorCleanup: VectorCleanupInfo
+      embeddingModel: string
+      embeddingDim: number
       /** Present when `?limit=` was used on the request. */
       limitedTo?: number
     }
@@ -48,16 +45,20 @@ function logIndex(fields: Record<string, unknown>): void {
 }
 
 export async function indexDocumentVectors(
-  env: IndexVectorsEnv,
+  env: IndexDocumentEnv,
   documentId: string,
   options: IndexVectorsOptions = {},
 ): Promise<IndexVectorsResult> {
   const { chunkLimit } = options
+  const embedModel = env.OLLAMA_EMBED_MODEL
+  const ollamaBase = env.OLLAMA_BASE_URL
 
   logIndex({
     event: 'start',
     documentId,
     chunkLimit: chunkLimit ?? null,
+    ollamaBase: ollamaBase.replace(/\/$/, ''),
+    embedModel,
   })
 
   const doc = await getDocumentById(env.DB, documentId)
@@ -139,7 +140,8 @@ export async function indexDocumentVectors(
       ok: true,
       documentId,
       indexed: 0,
-      vectorCleanup: V1_CLEANUP_SKIPPED,
+      embeddingModel: embedModel,
+      embeddingDim: 0,
       ...(chunkLimit !== undefined ? { limitedTo: chunkLimit } : {}),
     }
   }
@@ -147,9 +149,9 @@ export async function indexDocumentVectors(
   let vectors: number[][]
   try {
     const texts = chunksToIndex.map((c) => c.text)
-    vectors = await embedTextsBatched(env.AI, texts)
+    vectors = await embedTextsWithOllama(ollamaBase, embedModel, texts)
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'embedding request failed'
+    const message = err instanceof Error ? err.message : 'ollama embedding request failed'
     logIndex({
       event: 'embeddings_failed',
       documentId,
@@ -158,7 +160,7 @@ export async function indexDocumentVectors(
     })
     return {
       ok: false,
-      httpStatus: 500,
+      httpStatus: 502,
       error: 'embeddings_failed',
       detail: message,
       stage: 'embeddings_failed',
@@ -172,36 +174,32 @@ export async function indexDocumentVectors(
     firstVectorDim: vectors[0]?.length ?? null,
   })
 
-  const dimCheck = validateEmbeddingDimensions(vectors, BGE_BASE_EN_DIMS)
+  const dimCheck = validateEmbeddingSameDimensions(vectors)
   if (!dimCheck.ok) {
     logIndex({
       event: 'invalid_embedding_shape',
       documentId,
       index: dimCheck.index,
       actualDim: dimCheck.actualDim,
-      expectedDim: BGE_BASE_EN_DIMS,
+      expectedDim: dimCheck.expectedDim,
     })
     return {
       ok: false,
       httpStatus: 500,
       error: 'invalid_embedding_shape',
-      detail: `vector[${dimCheck.index}] length ${dimCheck.actualDim}, expected ${BGE_BASE_EN_DIMS}`,
+      detail: `vector[${dimCheck.index}] length ${dimCheck.actualDim}, expected ${dimCheck.expectedDim}`,
       stage: 'invalid_embedding_shape',
     }
   }
 
   try {
-    await upsertChunkVectors({
-      index: env.VECTOR_INDEX,
-      documentId,
-      title: doc.title,
-      chunks: chunksToIndex,
-      vectors,
-    })
+    for (let i = 0; i < chunksToIndex.length; i++) {
+      await updateChunkEmbeddingJson(env.DB, chunksToIndex[i].id, vectors[i], embedModel)
+    }
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'vectorize upsert failed'
+    const message = err instanceof Error ? err.message : 'd1 update failed'
     logIndex({
-      event: 'vector_upsert_failed',
+      event: 'persist_embeddings_failed',
       documentId,
       chunkCountAttempted: chunksToIndex.length,
       detail: message,
@@ -209,9 +207,9 @@ export async function indexDocumentVectors(
     return {
       ok: false,
       httpStatus: 500,
-      error: 'vector_upsert_failed',
+      error: 'persist_embeddings_failed',
       detail: message,
-      stage: 'vector_upsert_failed',
+      stage: 'persist_embeddings_failed',
     }
   }
 
@@ -219,6 +217,7 @@ export async function indexDocumentVectors(
     event: 'complete',
     documentId,
     indexed: chunksToIndex.length,
+    embeddingDim: dimCheck.dim,
     limited: chunkLimit !== undefined,
   })
 
@@ -226,7 +225,8 @@ export async function indexDocumentVectors(
     ok: true,
     documentId,
     indexed: chunksToIndex.length,
-    vectorCleanup: V1_CLEANUP_SKIPPED,
+    embeddingModel: embedModel,
+    embeddingDim: dimCheck.dim,
     ...(chunkLimit !== undefined ? { limitedTo: chunkLimit } : {}),
   }
 }

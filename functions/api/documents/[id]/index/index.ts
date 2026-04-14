@@ -42,8 +42,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     )
   }
 
+  const env = context.env as Env
+  const indexEnv = {
+    DB: env.DB,
+    OLLAMA_BASE_URL: env.OLLAMA_BASE_URL,
+    OLLAMA_EMBED_MODEL: env.OLLAMA_EMBED_MODEL,
+  }
+
   try {
-    const result = await indexDocumentVectors(context.env, id, { chunkLimit: limit })
+    const result = await indexDocumentVectors(indexEnv, id, { chunkLimit: limit })
     if (!result.ok) {
       return Response.json(
         {
@@ -59,7 +66,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       ok: true,
       documentId: result.documentId,
       indexed: result.indexed,
-      vectorCleanup: result.vectorCleanup,
+      embeddingModel: result.embeddingModel,
+      embeddingDim: result.embeddingDim,
+      backend: 'ollama+d1',
       ...(result.limitedTo !== undefined ? { limitedTo: result.limitedTo } : {}),
     })
   } catch (err) {

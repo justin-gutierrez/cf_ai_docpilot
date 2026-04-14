@@ -17,7 +17,7 @@ CREATE TABLE documents (
 CREATE INDEX idx_documents_status ON documents(status);
 CREATE INDEX idx_documents_created_at ON documents(created_at);
 
--- Chunks: text spans for citations; Vectorize metadata will reference chunk ids later.
+-- Chunks: text spans for citations; embeddings stored locally (see migration 0002).
 
 CREATE TABLE chunks (
   id TEXT PRIMARY KEY,

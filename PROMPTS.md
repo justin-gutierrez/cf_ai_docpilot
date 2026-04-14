@@ -574,3 +574,73 @@ Instructions:
 - then make the code changes
 - then list the exact local setup commands I need, including Ollama model pulls
 - then list the exact README quickstart steps I should include
+
+# Prompt 12:
+Use the current cf_ai_docpilot codebase and preserve the existing local-only Ollama + D1 + R2 foundation.
+
+Current goal:
+Implement the first working chat/Q&A route for asking questions about uploaded and indexed documents.
+
+Do the code changes now, not just the plan.
+
+Scope for this phase:
+- add a chat session route
+- add a message route that answers a user question grounded in indexed document chunks
+- use Ollama for both query embedding and final answer generation
+- use D1-stored chunk embeddings for retrieval
+- return citations with the answer
+- persist chat messages in D1
+
+Requirements:
+1. Add the Pages Functions files needed for:
+   - POST /api/chat/sessions
+   - GET /api/chat/sessions/[id]
+   - POST /api/chat/sessions/[id]/messages
+2. Use existing D1 tables:
+   - chat_sessions
+   - chat_messages
+3. On POST /api/chat/sessions:
+   - create a session
+   - optionally allow a documentId in the request body for doc-scoped chat
+4. On POST /api/chat/sessions/[id]/messages:
+   - accept a user question
+   - save the user message
+   - embed the query with Ollama using nomic-embed-text
+   - retrieve top-k similar chunks from D1 using the existing retrieval helpers
+   - build a grounded prompt using only the retrieved chunk text
+   - call ollamaChat() with qwen2.5:7b
+   - instruct the model to answer only from provided context and say when the answer is not supported
+   - save the assistant response
+   - return assistant content plus citations
+5. Citations should include enough information for later UI display, at minimum:
+   - chunkId
+   - documentId
+   - ordinal
+   - title if available
+6. Keep route handlers thin and move retrieval/prompt/chat logic into helper modules
+7. Preserve the local-only setup and existing code style
+
+Constraints:
+- no auth
+- no broad UI work
+- no Workers AI
+- no Vectorize
+- no broad refactors
+- keep code typed, small, and production-leaning
+
+Acceptance criteria:
+- I can create a chat session
+- I can send a question to a session
+- the app retrieves relevant chunks from D1
+- Ollama generates a grounded answer
+- the response includes citations
+- user and assistant messages are stored in D1
+
+Instructions:
+- first give a very short summary of the files you are about to edit
+- then make the code changes
+- then list the exact terminal commands I should run to test locally
+- then give me the exact curl commands to:
+  1. create a session
+  2. ask a question about document 44a3e4bc-de63-4699-940b-a441ba1978d8
+  3. fetch the session afterward

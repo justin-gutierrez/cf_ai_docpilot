@@ -809,3 +809,66 @@ Important:
 Instructions:
 - output the full PROMPTS.md content only
 ```
+## Prompt 16
+
+```text
+Add a reviewer-friendly demo flow to cf_ai_docpilot without changing the core architecture.
+
+Current goal:
+Create a simple, reliable sample document and a one-command smoke test script so a new person can quickly verify the project works end to end.
+
+Do the code changes now, not just the plan.
+
+Requirements:
+1. Add a new folder:
+   - sample_docs/
+2. Add one sample document:
+   - sample_docs/demo_handbook.md
+3. The sample document should be realistic, easy to query, and written in clear sections.
+4. Include content that supports obvious test questions, such as:
+   - what the document is about
+   - onboarding steps
+   - PTO policy
+   - communication guidelines
+   - deployment or tooling notes
+5. Use Markdown, not PDF, as the official demo document for reliability.
+6. Add a new script:
+   - scripts/demo.sh
+7. The demo script should:
+   - check /api/health
+   - upload sample_docs/demo_handbook.md
+   - parse the returned document id
+   - call ingest
+   - call index
+   - create a chat session scoped to that document
+   - ask one or two sample questions
+   - print the final assistant answer and citations in a readable way
+8. Keep the script simple and portable bash
+9. Do not add new app features or architecture changes
+10. Do not modify the existing API contracts unless absolutely necessary
+11. If needed, add a package.json script like:
+   - "demo": "bash scripts/demo.sh"
+12. Update README.md with a short "Quick demo" section that explains how to run the demo script after starting Ollama and the local Wrangler server
+
+Constraints:
+- no broad refactors
+- no new dependencies unless absolutely necessary
+- no UI work
+- preserve current local-only evaluation flow
+- keep everything production-leaning and reviewer-friendly
+
+Acceptance criteria:
+- the repo contains sample_docs/demo_handbook.md
+- the repo contains scripts/demo.sh
+- the demo script exercises the real upload → ingest → index → chat path
+- the README includes a short quick-demo section
+- a reviewer can follow the README and run the demo with minimal effort
+
+Instructions:
+- first give a very short summary of the files you are about to add or edit
+- then make the code changes
+- then list the exact commands I should run to test the demo locally
+- then show me the exact expected usage, including:
+  1. starting Ollama
+  2. starting the local app
+  3. running the demo script

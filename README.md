@@ -159,6 +159,49 @@ Other useful scripts:
 
 ---
 
+## Quick demo (one command)
+
+After completing the **One-time setup** steps above (including pulling Ollama models and running local D1 migrations), you can run a reviewer‑friendly end‑to‑end demo with a single command.
+
+1. **Start Ollama** and ensure the models are available:
+
+   ```bash
+   ollama serve          # or start the Ollama desktop app
+   ollama pull nomic-embed-text
+   ollama pull qwen2.5:7b
+   ```
+
+2. **Start the local app** (Pages static assets + Functions):
+
+   ```bash
+   npm run build
+   npx wrangler pages dev ./dist
+   ```
+
+   Note the URL Wrangler prints (for example `http://localhost:8788`). The demo script defaults to `http://localhost:8788`; if your port differs, set `API_BASE` before running it.
+
+3. **In a second terminal**, from the project root, run:
+
+   ```bash
+   npm run demo
+   ```
+
+   This script will:
+
+   - Hit `/api/health`.
+   - Upload `sample_docs/demo_handbook.md`.
+   - Ingest and index the document.
+   - Create a chat session scoped to that document.
+   - Ask a couple of sample questions and print the assistant answers and citations in a readable format.
+
+If your dev server is running on a non‑default port, you can override the base URL:
+
+```bash
+API_BASE=http://localhost:8789 npm run demo
+```
+
+---
+
 ## How to try it (step by step)
 
 Set a shell variable for the API base (adjust port if needed):
